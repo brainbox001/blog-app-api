@@ -46,6 +46,7 @@ services:
   celery:
     build:
       context: .
+    command: "celery -A app worker -l info"
     depends_on:
       - app
       - redis
@@ -59,6 +60,7 @@ services:
       context: .
     ports:
       - '5555:5555'
+    command: "celery -A app flower --address=0.0.0.0"
     depends_on:
       - celery
     networks:

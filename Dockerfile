@@ -5,6 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 COPY ./app /app
+COPY ./scripts /scripts
 COPY ./requirements.txt /tmp/requirements.txt
 WORKDIR /app
 EXPOSE 8000
@@ -21,7 +22,8 @@ apk del .tmp-build-deps
 
 RUN mkdir -p /vol/web/static && \
 mkdir -p /vol/web/media && \
-chmod -R 777 /vol
+chmod -R 777 /vol && \
+chmod -R +x /scripts
 
 ENV DJANGO_SETTINGS_MODULE=app.settings
 ENV PATH="/scripts:/py/bin:$PATH"
