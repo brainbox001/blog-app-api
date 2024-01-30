@@ -1,4 +1,5 @@
 from __future__ import absolute_import, unicode_literals
+from django.conf import settings
 
 import os
 import logging
@@ -11,10 +12,14 @@ logger = logging.getLogger("Celery")
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
 # Create a Celery instance and configure it using the settings from Django.
-celery_app = Celery('app')
+app = Celery('app')
 
 # Load task modules from all registered Django app configs.
-celery_app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Auto-discover tasks in all installed apps
-celery_app.autodiscover_tasks()
+app.autodiscover_tasks()
+
+@app.task(bind=True)
+def debug_task(self):
+    print('Request: {0!r}'.format(self.request))

@@ -9,3 +9,7 @@ celery
 redis
 django-celery-results
 flower
+django-q
+huey
+django-ckeditor
+djangorestframework-simplejwt

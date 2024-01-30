@@ -40,13 +40,15 @@ services:
   redis:
     image: 'redis:6.0-alpine'
     hostname: redis
+    ports:
+      - 6379:6379
     networks:
       - live
 
   celery:
     build:
       context: .
-    command: "celery -A app worker -l info"
+    command: "celery -A app worker -l info --loglevel=INFO"
     depends_on:
       - app
       - redis

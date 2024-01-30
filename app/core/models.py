@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.conf import settings
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -36,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=60)
 
     last_name = models.CharField(max_length=60)
-    username = models.CharField(max_length=60, unique=True)
+    username = models.CharField(max_length=60)
 
     date_joined = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=False)
@@ -46,4 +47,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
-User = get_user_model()
+
+class Post(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=255)
+    created_date = models.DateTimeField(default=timezone.now)
+
