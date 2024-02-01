@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_results',
+    'ckeditor',
+    'ckeditor_uploader',
     'core',
     'user',
     'rest_framework',
@@ -137,6 +139,8 @@ MEDIA_URL = '/static/media/'
 
 MEDIA_ROOT = 'vol/web/media'
 STATIC_ROOT = 'vol/web/static'
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
