@@ -1,9 +1,20 @@
+import os
+import uuid
+
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.conf import settings
 
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from ckeditor_uploader.fields import RichTextUploadingField
+
+
+def get_content_image_file_path(instance, filename):
+    """Generate filepath for image in content."""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+    return os.path.join('uploads', 'content_image', filename)
 
 
 class UserManager(BaseUserManager):
@@ -55,4 +66,27 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=255)
     created_date = models.DateTimeField(default=timezone.now)
+    content = models.OneToOneField('Content', on_delete=models.CASCADE)
+    images = models.ManyToManyField('ContentImage', blank=True)
 
+    class Meta:
+        ordering = ('-created_date', )
+
+    def __str__(self):
+        return self.title
+
+
+class Content(models.Model):
+
+    textfield = RichTextUploadingField()
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+class ContentImage(models.Model):
+    image = models.ImageField(upload_to=get_content_image_file_path)
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.image.name
