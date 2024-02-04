@@ -5,52 +5,36 @@ Views for the post APIs
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from core.models import Post, Content, ContentImage
-from .serializers import PostSerializer, ContentSerializer, ContentImageSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from core.models import Post, ContentImage
+from .serializers import PostSerializer, ContentImageSerializer
+from rest_framework.permissions import IsAdminUser, AllowAny
+from .permissions import IsOwnerOrReadOnly
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwnerOrReadOnly]
 
-    def create(self, request, *args, **kwargs):
-        post_data = request.data.copy()
-        print(f'####post = {type(post_data)}')
-        print(f'####post = {request.data}')
-        content = post_data.pop('content', None)
-        print(f'####content11 = {content}')
-        content_data = post_data.pop('content.textfield', None)[0]
-        content_data_dict = {'content': content_data,
-                             'textfield': content_data
-        }
-        print(f'####content = {content_data_dict}')
-        post_serializer = PostSerializer(data=post_data)
-        content_serializer = ContentSerializer(data=content_data_dict)
+    def list(self, request):
+        """Returns the list of post."""
+        queryset = Post.objects.all()
+        serializer = PostSerializer(queryset, many=True)
+        print(request.META.get('HTTP_HOST'))
+        return Response(serializer.data)
 
-        if content_serializer.is_valid(raise_exception=True):
-            if post_serializer.is_valid(raise_exception=True):
-                content_instance = content_serializer.save(author=request.user)
-                post_instance = post_serializer.save(author=request.user, content=content_instance)
-
-                return Response(PostSerializer(post_instance).data, status=status.HTTP_201_CREATED)
-        return Response(post_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    def get_permissions(self):
-        if self.action == "list" or self.action == "retrieve":
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    def perform_create(self, serializer):
+        """Create a new post"""
+        serializer.save(author=self.request.user)
 
 
 class ContentImageViewSet(ModelViewSet):
     queryset = ContentImage.objects.all()
     serializer_class = ContentImageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser, IsOwnerOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        data['uploader_id'] = request.user.id
+
         serialized = ContentImageSerializer(data=data)
         if serialized.is_valid():
             serialized.save()
@@ -61,5 +45,5 @@ class ContentImageViewSet(ModelViewSet):
         if self.action == "list" or self.action == "retrieve":
             permission_classes = [AllowAny, ]
         else:
-            permission_classes = [IsAuthenticated, ]
+            permission_classes = [IsAdminUser, IsOwnerOrReadOnly]
         return [permission() for permission in permission_classes]

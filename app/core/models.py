@@ -66,7 +66,7 @@ class Post(models.Model):
     )
     title = models.CharField(max_length=255)
     created_date = models.DateTimeField(default=timezone.now)
-    content = models.OneToOneField('Content', on_delete=models.CASCADE)
+    textfield = RichTextUploadingField()
     images = models.ManyToManyField('ContentImage', blank=True)
 
     class Meta:
@@ -75,14 +75,6 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
-
-class Content(models.Model):
-
-    textfield = RichTextUploadingField()
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
 
 class ContentImage(models.Model):
     image = models.ImageField(upload_to=get_content_image_file_path)
